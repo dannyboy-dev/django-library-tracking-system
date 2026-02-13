@@ -55,8 +55,7 @@ class ExtendLoanSerializer(serializers.Serializer):
         return value
 
 class TopActiveMemmbersSerializer(serializers.Serializer):
-    member_id = serializers.IntegerField()
+    id = serializers.IntegerField()
     username = serializers.CharField(max_length=15)
-    email = serializers.EmailField()
-    number_of_active_loans = serializers.IntegerField()
+    active_loans = serializers.IntegerField()
 
