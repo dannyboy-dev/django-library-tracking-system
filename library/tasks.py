@@ -1,5 +1,7 @@
 from celery import shared_task
-from .models import Loan
+from .models import Loan, Member
+from django.db.models import Prefetch, Count
+
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
@@ -23,8 +25,24 @@ def send_loan_notification(loan_id):
 @shared_task
 def check_overdue_loans():
     try:
-        loans = Loan.objects.select_related("member").filter(is_returned=False,due_date__lt=timezone.now().date())
-        for loan in loans:
-            send_loan_notification.delay(loan.id)
+
+        loans = Prefetch(
+            "loans",
+            queryset=Loan.objects.filter(is_returned=False,due_date__lt=timezone.now().date())
+        )
+
+        members = Member.objects.prefetch_related(loans) \
+                .annotate(num_loans = Count("loans", distinct=True)) \
+                .filter(num_loans__gt=0)
+        
+        for member in members:
+            send_mail(
+                subject='Overdue Books',
+                message=f'Hello {member.user.username},\n\nYou have {member.num_loans} overdue books',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[member.user.email],
+                fail_silently=False,
+            )
+
     except Exception as e:
         pass
