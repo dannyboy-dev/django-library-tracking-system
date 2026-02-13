@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from django.db.models import Prefetch, Count, Q, F
 
 class AuthorViewSet(viewsets.ModelViewSet):
-    queryset = Author.objects.all()
+    queryset = Author.objects.prefetch_related("books").all()
     serializer_class = AuthorSerializer
 
 class BookViewSet(viewsets.ModelViewSet):
@@ -50,7 +50,7 @@ class BookViewSet(viewsets.ModelViewSet):
         return Response({'status': 'Book returned successfully.'}, status=status.HTTP_200_OK)
 
 class MemberViewSet(viewsets.ModelViewSet):
-    queryset = Member.objects.all()
+    queryset = Member.objects.prefetch_related("loans").all()
     serializer_class = MemberSerializer
 
     @action(detail=False, methods=['get'], url_path="top-active", serializer_class = TopActiveMemmbersSerializer)
@@ -67,7 +67,7 @@ class MemberViewSet(viewsets.ModelViewSet):
         return Response(serilizer.data, status=status.HTTP_200_OK)
 
 class LoanViewSet(viewsets.ModelViewSet):
-    queryset = Loan.objects.all()
+    queryset = Loan.objects.select_related("book","member").all()
     serializer_class = LoanSerializer
 
     @action(detail=True, methods=['post'], serializer_class = ExtendLoanSerializer)
