@@ -45,3 +45,13 @@ class LoanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Loan
         fields = ['id', 'book', 'book_id', 'member', 'member_id', 'loan_date', 'return_date', 'is_returned']
+
+class ExtendLoanSerializer(serializers.Serializer):
+    additional_days = serializers.IntegerField()
+
+    def validate_additional_days(self, value):
+
+        if value < 0:
+            raise serializers.ValidationError("additional_days cannot be less than 0")
+
+        return value
