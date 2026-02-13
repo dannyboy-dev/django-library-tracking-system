@@ -5,13 +5,17 @@ from .serializers import AuthorSerializer, BookSerializer, MemberSerializer, Loa
 from rest_framework.decorators import action
 from django.utils import timezone
 from .tasks import send_loan_notification
+from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
+from django.db.models import Prefetch
 
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
 
 class BookViewSet(viewsets.ModelViewSet):
-    queryset = Book.objects.all()
+    queryset = Book.objects.prefetch_related(
+        Prefetch("loans", Loan.objects.select_related("book","member"))
+    )
     serializer_class = BookSerializer
 
     @action(detail=True, methods=['post'])
