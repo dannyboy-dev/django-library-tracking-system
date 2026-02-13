@@ -51,6 +51,6 @@ class Loan(models.Model):
     def save(self, *args, **kwrags):
 
         if not self.due_date:
-            self.loan_date = self.due_date + timezone.timedelta(days=14)
+            self.due_date = self.loan_date + timezone.timedelta(days=14)
 
         super().save(*args, **kwrags)
