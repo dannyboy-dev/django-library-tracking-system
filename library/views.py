@@ -72,11 +72,14 @@ class LoanViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], serializer_class = ExtendLoanSerializer)
     def extend_due_date (self, request, pk=None): 
-        serializer = ExtendLoanSerializer(request.data)
+        serializer = ExtendLoanSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         loan = self.get_object()
-        loan.due_date += serializer.validated_data.get("additional_days")
+        if loan.due_date is not None:
+            loan.due_date += timezone.timedelta(days=serializer.validated_data.get("additional_days"))
+        else:
+            loan.due_date = timezone.now().date()
         loan.save()
         return Response({'status': 'Loan extended successfully.'}, status=status.HTTP_200_OK)
     
