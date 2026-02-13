@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from celery.schedules import crontab
 
 load_dotenv()
 
@@ -129,3 +130,14 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
     # OTHER SETTINGS
 }
+
+CELERY_BEAT_SCHEDULE = {
+    "check_overdue_loans_daily": {
+        
+        "task": "library.tasks.check_overdue_loans",
+        # Every day at 09:00
+        "schedule": crontab(hour=9, minute=0),
+    }
+}
+
+CELERY_TIMEZONE = "Africa/Nairobi"
