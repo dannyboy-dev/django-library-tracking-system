@@ -50,8 +50,15 @@ class ExtendLoanSerializer(serializers.Serializer):
     additional_days = serializers.IntegerField()
 
     def validate_additional_days(self, value):
-
         if value < 0:
             raise serializers.ValidationError("additional_days cannot be less than 0")
-
         return value
+
+class TopActiveMemmbersSerializer(serializers.Serializer):
+    user__id = serializers.PrimaryKeyRelatedField(
+        queryset=Member.objects.all(), source='member'
+    )
+    user__username = serializers.CharField(max_length=15)
+    user__email = serializers.EmailField()
+    activer_loans = serializers.IntegerField()
+

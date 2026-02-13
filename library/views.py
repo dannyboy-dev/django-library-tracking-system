@@ -1,12 +1,12 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from .models import Author, Book, Member, Loan
-from .serializers import AuthorSerializer, BookSerializer, MemberSerializer, LoanSerializer, ExtendLoanSerializer
+from .serializers import AuthorSerializer, BookSerializer, MemberSerializer, LoanSerializer, ExtendLoanSerializer, TopActiveMemmbersSerializer
 from rest_framework.decorators import action
 from django.utils import timezone
 from .tasks import send_loan_notification
-from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
-from django.db.models import Prefetch
+from rest_framework.views import APIView
+from django.db.models import Prefetch, Count, Q
 
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.all()
@@ -53,6 +53,20 @@ class MemberViewSet(viewsets.ModelViewSet):
     queryset = Member.objects.all()
     serializer_class = MemberSerializer
 
+    @action(detail=False, methods=['get'], url_path="top-active", serializer_class = TopActiveMemmbersSerializer)
+    def top_active_members(self, request, pk=None): 
+        members = Member.objects \
+        .select_related("user") \
+        .prefetch_related("loans") \
+        .annotate(activer_loans = Count("loans",distinct=True, filter=Q(loans__is_returned=True))) \
+        .values('user__id','user__username','user__email','activer_loans')
+
+        print(members)
+
+        serilizer = TopActiveMemmbersSerializer(members, many=True)
+
+        return Response(serilizer.data, status=status.HTTP_200_OK)
+
 class LoanViewSet(viewsets.ModelViewSet):
     queryset = Loan.objects.all()
     serializer_class = LoanSerializer
@@ -66,8 +80,6 @@ class LoanViewSet(viewsets.ModelViewSet):
         loan.due_date += serializer.validated_data.get("additional_days")
         loan.save()
         return Response({'status': 'Loan extended successfully.'}, status=status.HTTP_200_OK)
-
-
-
+    
 
 
