@@ -62,10 +62,7 @@ class MemberViewSet(viewsets.ModelViewSet):
         .annotate(member_id=F('id'),username=F('user__username'),email=F('user__email'),number_of_active_loans=F('activer_loans'),) \
         .values('member_id','username','email','number_of_active_loans')
 
-        print(members)
-
         serilizer = TopActiveMemmbersSerializer(members, many=True)
-
         return Response(serilizer.data, status=status.HTTP_200_OK)
 
 class LoanViewSet(viewsets.ModelViewSet):
@@ -81,6 +78,7 @@ class LoanViewSet(viewsets.ModelViewSet):
         loan.due_date += serializer.validated_data.get("additional_days")
         loan.save()
         return Response({'status': 'Loan extended successfully.'}, status=status.HTTP_200_OK)
+    
     
 
 
