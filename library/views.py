@@ -58,7 +58,7 @@ class MemberViewSet(viewsets.ModelViewSet):
         members = Member.objects \
         .select_related("user") \
         .prefetch_related("loans") \
-        .annotate(activer_loans = Count("loans",distinct=True, filter=Q(loans__is_returned=True))) \
+        .annotate(activer_loans = Count("loans",distinct=True, filter=Q(loans__is_returned=False))) \
         .annotate(member_id=F('id'),username=F('user__username'),email=F('user__email'),number_of_active_loans=F('activer_loans'),) \
         .order_by('-activer_loans') \
         .values('member_id','username','email','number_of_active_loans')[:5]
