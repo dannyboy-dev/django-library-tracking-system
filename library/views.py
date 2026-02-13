@@ -13,7 +13,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
     serializer_class = AuthorSerializer
 
 class BookViewSet(viewsets.ModelViewSet):
-    queryset = Book.objects.prefetch_related(
+    queryset = Book.objects.select_related("author").prefetch_related(
         Prefetch("loans", Loan.objects.select_related("book","member"))
     )
     serializer_class = BookSerializer
