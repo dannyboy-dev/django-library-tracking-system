@@ -6,7 +6,7 @@ from rest_framework.decorators import action
 from django.utils import timezone
 from .tasks import send_loan_notification
 from rest_framework.views import APIView
-from django.db.models import Prefetch, Count, Q
+from django.db.models import Prefetch, Count, Q, F
 
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.all()
@@ -59,7 +59,8 @@ class MemberViewSet(viewsets.ModelViewSet):
         .select_related("user") \
         .prefetch_related("loans") \
         .annotate(activer_loans = Count("loans",distinct=True, filter=Q(loans__is_returned=True))) \
-        .values('id','user__username','user__email','activer_loans')
+        .annotate(member_id=F('id'),username=F('user__username'),email=F('user__email'),number_of_active_loans=F('activer_loans'),) \
+        .values('member_id','username','email','number_of_active_loans')
 
         print(members)
 
