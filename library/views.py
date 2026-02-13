@@ -60,7 +60,7 @@ class MemberViewSet(viewsets.ModelViewSet):
         .prefetch_related("loans") \
         .annotate(activer_loans = Count("loans",distinct=True, filter=Q(loans__is_returned=True))) \
         .annotate(member_id=F('id'),username=F('user__username'),email=F('user__email'),number_of_active_loans=F('activer_loans'),) \
-        .values('member_id','username','email','number_of_active_loans')
+        .values('member_id','username','email','number_of_active_loans')[:5]
 
         serilizer = TopActiveMemmbersSerializer(members, many=True)
         return Response(serilizer.data, status=status.HTTP_200_OK)
